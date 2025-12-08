@@ -4,7 +4,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:Nandalinda%401@localhost:5432/barbeTime?schema=public"
+  url      = env("DATABASE_URL")
 }
 
 // usuarios (clientes e barbeiros)
