@@ -1,240 +1,143 @@
-import pkg from '@prisma/client';
-const { PrismaClient } = pkg;
+import { PrismaClient } from '@prisma/client';
+import bcrypt from 'bcrypt';  // ✅ ADICIONADO
 
 const prisma = new PrismaClient();
 
 async function main() {
   console.log('populando o banco...');
 
-  // limpa tudo
+  // limpa antes (ordem importa por causa das FKs)
   await prisma.agendamento.deleteMany();
   await prisma.servico.deleteMany();
   await prisma.usuario.deleteMany();
 
+  // ✅ CORRIGIDO: hash das senhas
+  const senhaHash = await bcrypt.hash('123456', 10);
+
   // cria barbeiros
-  const marcelo = await prisma.usuario.create({
+  const joao = await prisma.usuario.create({
     data: {
-      nome: 'Marcelo "Cabelin" Ferreira',
-      email: 'marcelo.cabelin@barbetime.com.br',
-      telefone: '21987456321',
-      senha: 'barbeiro2024', // TODO: fazer hash com bcrypt
+      nome: 'João Silva',
+      email: 'joao@barbearia.com',
+      telefone: '11987654321',
+      senha: senhaHash,
       tipo: 'BARBEIRO',
     },
   });
 
-  const thiago = await prisma.usuario.create({
+  const carlos = await prisma.usuario.create({
     data: {
-      nome: 'Thiago Barbosa',
-      email: 'thiago.barbosa@barbetime.com.br',
-      telefone: '21976543210',
-      senha: 'corte@123',
-      tipo: 'BARBEIRO',
-    },
-  });
-
-  const rafael = await prisma.usuario.create({
-    data: {
-      nome: 'Rafael "Tesoura de Ouro" Costa',
-      email: 'rafael.costa@barbetime.com.br',
-      telefone: '21965432109',
-      senha: 'tesoura@2024',
+      nome: 'Carlos Santos',
+      email: 'carlos@barbearia.com',
+      telefone: '11987654322',
+      senha: senhaHash,
       tipo: 'BARBEIRO',
     },
   });
 
   // cria clientes
-  const lucas = await prisma.usuario.create({
+  const pedro = await prisma.usuario.create({
     data: {
-      nome: 'Lucas Mendes',
-      email: 'lucas.mendes@gmail.com',
-      telefone: '21998887766',
-      senha: 'cliente123',
+      nome: 'Pedro Oliveira',
+      email: 'pedro@email.com',
+      telefone: '11912345678',
+      senha: senhaHash,
       tipo: 'CLIENTE',
     },
   });
 
-  const fernanda = await prisma.usuario.create({
+  const ana = await prisma.usuario.create({
     data: {
-      nome: 'Fernanda Alves',
-      email: 'fe.alves@hotmail.com',
-      telefone: '21997776655',
-      senha: 'fe@2024',
-      tipo: 'CLIENTE',
-    },
-  });
-
-  const bruno = await prisma.usuario.create({
-    data: {
-      nome: 'Bruno Henrique',
-      email: 'brunohr@outlook.com',
-      telefone: '21996665544',
-      senha: 'bruno#456',
-      tipo: 'CLIENTE',
-    },
-  });
-
-  const camila = await prisma.usuario.create({
-    data: {
-      nome: 'Camila Rodrigues',
-      email: 'camilar@yahoo.com.br',
-      telefone: '21995554433',
-      senha: 'cami789',
+      nome: 'Ana Costa',
+      email: 'ana@email.com',
+      telefone: '11912345679',
+      senha: senhaHash,
       tipo: 'CLIENTE',
     },
   });
 
   console.log('usuarios ok');
 
-  // servicos do Marcelo "Cabelin"
-  const corteMasculino = await prisma.servico.create({
+  // servicos do João
+  const corte = await prisma.servico.create({
     data: {
-      nome: 'Corte Masculino Clássico',
-      descricao: 'Corte tradicional com máquina e tesoura, finalização com navalha',
-      preco: 45.0,
-      duracao: 40,
-      barbeiroId: marcelo.id,
-    },
-  });
-
-  const barbaCompleta = await prisma.servico.create({
-    data: {
-      nome: 'Barba Completa',
-      descricao: 'Aparo, alinhamento e hidratação com toalha quente',
+      nome: 'Corte Masculino',
+      descricao: 'Corte simples',
       preco: 35.0,
       duracao: 30,
-      barbeiroId: marcelo.id,
+      barbeiroId: joao.id,
     },
   });
 
-  const comboExecutivo = await prisma.servico.create({
+  const barba = await prisma.servico.create({
     data: {
-      nome: 'Combo Executivo',
-      descricao: 'Corte + Barba + Sobrancelha + Finalização Premium',
-      preco: 85.0,
-      duracao: 75,
-      barbeiroId: marcelo.id,
-    },
-  });
-
-  // serviços do Thiago
-  const degradeModerno = await prisma.servico.create({
-    data: {
-      nome: 'Degradê Moderno',
-      descricao: 'Corte degradê com risquinho e desenho personalizado',
-      preco: 55.0,
-      duracao: 50,
-      barbeiroId: thiago.id,
-    },
-  });
-
-  const barbaTerapia = await prisma.servico.create({
-    data: {
-      nome: 'Barba Terapia',
-      descricao: 'Tratamento completo com óleos essenciais e massagem relaxante',
-      preco: 60.0,
-      duracao: 45,
-      barbeiroId: thiago.id,
-    },
-  });
-
-  // serviços do Rafael "Tesoura de Ouro"
-  const corteEstiloso = await prisma.servico.create({
-    data: {
-      nome: 'Corte Estiloso',
-      descricao: 'Corte moderno com texturização e styling',
-      preco: 65.0,
-      duracao: 55,
-      barbeiroId: rafael.id,
-    },
-  });
-
-  const sobrancelha = await prisma.servico.create({
-    data: {
-      nome: 'Design de Sobrancelha',
-      descricao: 'Modelagem profissional com pinça e navalha',
+      nome: 'Barba',
+      descricao: 'Aparar barba',
       preco: 25.0,
       duracao: 20,
-      barbeiroId: rafael.id,
+      barbeiroId: joao.id,
+    },
+  });
+
+  const combo = await prisma.servico.create({
+    data: {
+      nome: 'Corte + Barba',
+      descricao: 'Combo completo',
+      preco: 55.0,
+      duracao: 50,
+      barbeiroId: joao.id,
+    },
+  });
+
+  // serviço do Carlos
+  await prisma.servico.create({
+    data: {
+      nome: 'Sobrancelha',
+      descricao: 'Design de sobrancelha',
+      preco: 15.0,
+      duracao: 15,
+      barbeiroId: carlos.id,
     },
   });
 
   console.log('servicos ok');
 
-  // alguns agendamentos realistas
-  const hoje = new Date();
-  const amanha = new Date(hoje);
-  amanha.setDate(hoje.getDate() + 1);
-  const depois = new Date(hoje);
-  depois.setDate(hoje.getDate() + 2);
+  // alguns agendamentos
+  const agora = new Date();
+  const amanha = new Date();
+  amanha.setDate(agora.getDate() + 1);
 
-  // Lucas agendou combo executivo com Marcelo para hoje 9h
+  // Pedro agendou corte+barba com o João pra hoje 10h
   await prisma.agendamento.create({
     data: {
-      dataHora: new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 9, 0, 0),
+      dataHora: new Date(agora.setHours(10, 0, 0, 0)),
       status: 'CONFIRMADO',
-      observacao: 'Cliente preferencial - tem reunião importante às 11h',
-      clienteId: lucas.id,
-      barbeiroId: marcelo.id,
-      servicoId: comboExecutivo.id,
+      observacao: 'cliente vip',
+      clienteId: pedro.id,
+      barbeiroId: joao.id,
+      servicoId: combo.id,
     },
   });
 
-  // Fernanda agendou design de sobrancelha com Rafael para hoje 14h
+  // Ana agendou corte com o João pra hoje 14h30
   await prisma.agendamento.create({
     data: {
-      dataHora: new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 14, 0, 0),
-      status: 'CONFIRMADO',
-      observacao: 'Primeira vez - foi indicada pela amiga',
-      clienteId: fernanda.id,
-      barbeiroId: rafael.id,
-      servicoId: sobrancelha.id,
-    },
-  });
-
-  // Bruno agendou degradê moderno com Thiago para amanhã 10h30
-  await prisma.agendamento.create({
-    data: {
-      dataHora: new Date(amanha.getFullYear(), amanha.getMonth(), amanha.getDate(), 10, 30, 0),
+      dataHora: new Date(agora.setHours(14, 30, 0, 0)),
       status: 'PENDENTE',
-      observacao: 'Cliente quer risco personalizado - trazer referência',
-      clienteId: bruno.id,
-      barbeiroId: thiago.id,
-      servicoId: degradeModerno.id,
+      clienteId: ana.id,
+      barbeiroId: joao.id,
+      servicoId: corte.id,
     },
   });
 
-  // Camila agendou corte estiloso com Rafael para amanhã 16h
+  // Pedro agendou barba com o Carlos pra amanhã 11h
   await prisma.agendamento.create({
     data: {
-      dataHora: new Date(amanha.getFullYear(), amanha.getMonth(), amanha.getDate(), 16, 0, 0),
+      dataHora: new Date(amanha.setHours(11, 0, 0, 0)),
       status: 'PENDENTE',
-      clienteId: camila.id,
-      barbeiroId: rafael.id,
-      servicoId: corteEstiloso.id,
-    },
-  });
-
-  // Lucas agendou barba completa com Marcelo para depois de amanhã 11h
-  await prisma.agendamento.create({
-    data: {
-      dataHora: new Date(depois.getFullYear(), depois.getMonth(), depois.getDate(), 11, 0, 0),
-      status: 'PENDENTE',
-      observacao: 'Retorno - manutenção mensal',
-      clienteId: lucas.id,
-      barbeiroId: marcelo.id,
-      servicoId: barbaCompleta.id,
-    },
-  });
-
-  // Bruno agendou barba terapia com Thiago para depois de amanhã 15h
-  await prisma.agendamento.create({
-    data: {
-      dataHora: new Date(depois.getFullYear(), depois.getMonth(), depois.getDate(), 15, 0, 0),
-      status: 'PENDENTE',
-      observacao: 'Cliente estressado - recomendou tratamento relaxante',
-      clienteId: bruno.id,
-      barbeiroId: thiago.id,
-      servicoId: barbaTerapia.id,
+      clienteId: pedro.id,
+      barbeiroId: carlos.id,
+      servicoId: barba.id,
     },
   });
 
