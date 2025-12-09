@@ -22,9 +22,16 @@ async create(data, clienteId) {
     const inicio = new Date(data.dataHora);
     // REMOVA A LINHA REDUNDANTE: const servicoDuracao = await ServicoService.buscarPorId(data.servicoId);
     const fim = new Date(inicio.getTime() + servico.duracao * 60000); // Usa 'servico.duracao'
+    const conflito = await prisma.agendamento.findFirst({
+        where: {
+        barbeiroId: data.barbeiroId,
+        dataHora: data.dataHora,
+        deletedAt: null
+  }
+});
     
         if (conflito) {
-            throw new Error('Já existe um agendamento para este barbeiro neste horário ou há conflito de duração com outro agendamento feito com esse barbeiro');
+            throw new Error('Já existe um agendamento para este barbeiro neste horário.');
         }
 
 

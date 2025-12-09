@@ -13,8 +13,8 @@ export const agendamentoController = {
             const data = agendamentoSchema.parse(req.body);
 
             //dependo da autenticação Jwt
-            //id para teste, depois trocar por req.user.id que vem do Jwt
-            const clienteId =  "2d92b846-f761-4518-b41f-6f978acefe66" //|| "15883368-aa78-40de-b22e-e66c32959f47"
+            //id para teste passado no body, depois trocar pelo que vem do Jwt
+            const clienteId =  req.user.id;
 
             const novoAgendamento = await agendamentoService.create(data, clienteId);
             res.status(201).json({
@@ -29,7 +29,7 @@ export const agendamentoController = {
 
     async findAll(req, res) {
         try {
-            const user = req.user || { id: "15883368-aa78-40de-b22e-e66c32959f47", tipo: "BARBEIRO" }; // depende da dupla 2
+            const user = req.user; // depois mudar pra o original do jwt
             const { page = 1, perPage = 10 } = req.query;
 
             const lista = await agendamentoService.findAll(user, Number(page), Number(perPage));
@@ -42,7 +42,7 @@ export const agendamentoController = {
     async findById(req, res) {
         console.log("entrou no controller findById");
         try {
-            const user = req.user || { id: "15883368-aa78-40de-b22e-e66c32959f47", tipo: "BARBEIRO" }; // depende da dupla 2
+            const user = req.user; // depois mudar pra o original do jwt
             const agendamento = await agendamentoService.findById(req.params.id, user);
             res.status(200).json({
                 success: true,
@@ -55,7 +55,7 @@ export const agendamentoController = {
 
     async update(req, res) {
         try {
-            const user = req.user || { id: "2d92b846-f761-4518-b41f-6f978acefe66", tipo: "CLIENTE" }; // depende da dupla 2
+            const user = req.user; // mudar pra o original do jwt
             const atualizado = await agendamentoService.update(req.params.id, req.body, user);
             res.status(200).json({
                 success: true,
@@ -69,7 +69,7 @@ export const agendamentoController = {
 
     async delete(req, res) {
         try {
-            const user = req.user || { id: "2d92b846-f761-4518-b41f-6f978acefe66", tipo: "CLIENTE" }; // depende da dupla 2
+            const user = req.user; // mudar pro original jwt
             await agendamentoService.delete(req.params.id, user);
             res.status(200).json({
                 success: true,

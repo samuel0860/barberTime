@@ -1,18 +1,10 @@
 import { Router } from "express";
-<<<<<<< HEAD
 import ServicoController from "../controllers/servicoController.js";
-=======
-import ServicoController from "../controllers/servicoController.js";  
->>>>>>> main
 
 const router = Router();
 
 // Listar todos
-<<<<<<< HEAD
 router.get("/", ServicoController.listar);
-=======
-router.get("/", ServicoController.listar);  
->>>>>>> main
 
 // Buscar por ID
 router.get("/:id", ServicoController.buscarPorId);
