@@ -1,24 +1,9 @@
-import prisma from "../prisma/client.js";
+import prisma from "../config/database.js";
 import ServicoRepository from "../repositories/servicoRepository.js";
 
 export const ServicoService = {
   // Criar um novo serviço
   criar: async (dados) => {
-    console.log("Dados recebidos no service:", dados); // Log pra confirmar que o barbeiroId chegou
-
-    if (!dados.barbeiroId) {
-      throw new Error("O campo 'barbeiroId' é obrigatório e deve ser um UUID válido.");
-    }
-
-    return prisma.servico.create({
-      data: {
-        nome: dados.nome,
-        descricao: dados.descricao || null,
-        preco: Number(dados.preco),
-        duracao: Number(dados.duracao),
-        barbeiroId: dados.barbeiroId, // vínculo com o barbeiro
-      },
-    });
     return ServicoRepository.criar(dados);
   },
 
@@ -56,29 +41,23 @@ export const ServicoService = {
     return servico;
   },
 
-  atualizar: async (id, dados) => {
-    await this.buscarPorId(id);
-    return ServicoRepository.atualizar(id, dados);
-  },
-
   // Atualizar serviço
   atualizar: async (id, dados) => {
-  // remove campos undefined
-  const dadosLimpos = Object.fromEntries(
-    Object.entries(dados).filter(([_, v]) => v !== undefined)
-  );
+    // Remove campos undefined
+    const dadosLimpos = Object.fromEntries(
+      Object.entries(dados).filter(([_, v]) => v !== undefined)
+    );
 
-  console.log("Dados limpos enviados para update:", dadosLimpos);
+    console.log("Dados limpos enviados para update:", dadosLimpos);
 
-  return prisma.servico.update({
-    where: { id },
-    data: {
-      ...dadosLimpos,
-      updatedAt: new Date(),
-    },
-  });
-},
-
+    return prisma.servico.update({
+      where: { id },
+      data: {
+        ...dadosLimpos,
+        updatedAt: new Date(),
+      },
+    });
+  },
 
   // Soft delete de serviço
   deletar: async (id) => {

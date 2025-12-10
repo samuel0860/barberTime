@@ -1,6 +1,7 @@
 import { success } from 'zod';
-import prisma from '../prisma/client.js';
+import prisma from '../config/database.js';
 import { ServicoService } from './servicoService.js'
+
 // exportando as funções do serviço de agendamento
 export const agendamentoService = {
     // agendamentoService.js - Função create
