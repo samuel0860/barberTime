@@ -1,4 +1,3 @@
-import prisma from "../config/database.js";
 import ServicoRepository from "../repositories/servicoRepository.js";
 
 export const ServicoService = {
@@ -11,15 +10,8 @@ export const ServicoService = {
   listar: async (page = 1, perPage = 10) => {
     const skip = (page - 1) * perPage;
 
-    const servicos = await prisma.servico.findMany({
-      skip,
-      take: perPage,
-      where: { deletedAt: null },
-    });
-
-    const total = await prisma.servico.count({
-      where: { deletedAt: null },
-    });
+    const servicos = await ServicoRepository.listar(skip, perPage);
+    const total = await ServicoRepository.contar();
 
     return {
       page,
@@ -48,22 +40,14 @@ export const ServicoService = {
       Object.entries(dados).filter(([_, v]) => v !== undefined)
     );
 
-    console.log("Dados limpos enviados para update:", dadosLimpos);
-
-    return prisma.servico.update({
-      where: { id },
-      data: {
-        ...dadosLimpos,
-        updatedAt: new Date(),
-      },
+    return ServicoRepository.atualizar(id, {
+      ...dadosLimpos,
+      updatedAt: new Date(),
     });
   },
 
   // Soft delete de serviço
   deletar: async (id) => {
-    return prisma.servico.update({
-      where: { id },
-      data: { deletedAt: new Date() },
-    });
+    return ServicoRepository.deletar(id);
   },
 };
