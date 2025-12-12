@@ -86,3 +86,13 @@ export const isCliente = (req, res, next) => {
   }
   next();
 };
+
+// Middleware para verificar se o usuário é administrador
+export const isAdmin = (req, res, next) => {
+  if (req.usuario.tipo !== 'ADMIN') {
+    return res.status(403).json({
+      error: 'Acesso negado. Apenas administradores podem acessar esta rota'
+    });
+  }
+  next();
+};

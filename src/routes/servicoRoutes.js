@@ -1,21 +1,16 @@
 import { Router } from "express";
 import ServicoController from "../controllers/servicoController.js";
+import { authenticate, isAdmin } from "../middlewares/authMiddleware.js";
 
 const router = Router();
 
-// Listar todos
+// Rotas públicas (qualquer um pode ver serviços)
 router.get("/", ServicoController.listar);
-
-// Buscar por ID
 router.get("/:id", ServicoController.buscarPorId);
 
-// Criar serviço
-router.post("/", ServicoController.criar);
+// Rotas protegidas (apenas ADMIN pode criar/editar/deletar)
+router.post("/", authenticate, isAdmin, ServicoController.criar);
+router.put("/:id", authenticate, isAdmin, ServicoController.atualizar);
+router.delete("/:id", authenticate, isAdmin, ServicoController.deletar);
 
-// Atualizar serviço
-router.put("/:id", ServicoController.atualizar);
-
-// Deletar serviço
-router.delete("/:id", ServicoController.deletar);
-
-export default router;
+export default router;
