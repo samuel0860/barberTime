@@ -1,74 +1,58 @@
-import { success } from 'zod';
-import prisma from '../config/database.js';
-import { ServicoService } from './servicoService.js'
+import AgendamentoRepository from '../repositories/agendamentoRepository.js';
+import { ServicoService } from './servicoService.js';
 
-// exportando as funções do serviço de agendamento
 export const agendamentoService = {
-    // agendamentoService.js - Função create
-async create(data, clienteId) {
-    
-    const servico = await ServicoService.buscarPorId(data.servicoId);
-    
-    //Verificação de existência de serviço
-    if (!servico || servico.deletedAt) {
-        throw new Error('Serviço não encontrado ou indisponível.');
-    }
+    async create(data, clienteId) {
+        // 1. Buscar serviço
+        const servico = await ServicoService.buscarPorId(data.servicoId);
+        
+        if (!servico || servico.deletedAt) {
+            throw new Error('Serviço não encontrado ou indisponível.');
+        }
 
-    //  Verifica se barbeiro informado é o mesmo que oferece o serviço
-    if (servico.barbeiroId !== data.barbeiroId) {
-        throw new Error('O barbeiro informado não oferece esse serviço.');
-    }
-    
-    // de conflito de agendamento 
-    const inicio = new Date(data.dataHora);
-    // REMOVA A LINHA REDUNDANTE: const servicoDuracao = await ServicoService.buscarPorId(data.servicoId);
-    const fim = new Date(inicio.getTime() + servico.duracao * 60000); // Usa 'servico.duracao'
-    const conflito = await prisma.agendamento.findFirst({
-        where: {
-        barbeiroId: data.barbeiroId,
-        dataHora: data.dataHora,
-        deletedAt: null
-  }
-});
-    
+        // 2. Verificar se barbeiro oferece o serviço
+        if (servico.barbeiroId !== data.barbeiroId) {
+            throw new Error('O barbeiro informado não oferece esse serviço.');
+        }
+        
+        // 3. Verificar conflito de horário (AGORA CORRETO)
+        const conflito = await AgendamentoRepository.verificarConflito(
+            data.barbeiroId,
+            new Date(data.dataHora),
+            servico.duracao
+        );
+        
         if (conflito) {
             throw new Error('Já existe um agendamento para este barbeiro neste horário.');
         }
 
-
-        // criando o agendamento
-        return prisma.agendamento.create({
-            data: {
-                dataHora: new Date(data.dataHora),
-                observacao: data.observacao || null,
-                clienteId, //associando o cliente
-                barbeiroId: data.barbeiroId,
-                servicoId: data.servicoId,
-            },
-            include: { servico: true, barbeiro: true},
+        // 4. Criar agendamento
+        return AgendamentoRepository.criar({
+            dataHora: new Date(data.dataHora),
+            observacao: data.observacao || null,
+            clienteId,
+            barbeiroId: data.barbeiroId,
+            servicoId: data.servicoId,
         });
     },
 
-// buscando todos os agendamentos
-
     async findAll(user, page = 1, perPage = 10) {
-        const filtros = 
-            user.tipo === "BARBEIRO"
-            ? { barbeiroId: user.id}
-            : { clienteId: user.id};
+        const tipo = user.tipo?.toUpperCase();
+        
+        const filtros = tipo === "BARBEIRO"
+            ? { barbeiroId: user.id }
+            : { clienteId: user.id };
 
-        const skip = (page - 1) * perPage
+        const skip = (page - 1) * perPage;
 
-        const [agendamentos, total] = await Promise.all([
-            prisma.agendamento.findMany({
-                where: { ...filtros, deletedAt: null },
-                include: { servico: true, barbeiro: true, cliente: true },
-                orderBy: { dataHora: "asc" },
-                skip,
-                take: perPage,
-                }),
-        prisma.agendamento.count({ where: { ...filtros, deletedAt: null } }),
-  ]);
+        const agendamentos = await AgendamentoRepository.listar(
+            skip, 
+            perPage, 
+            filtros
+        );
+        
+        const total = await AgendamentoRepository.contar(filtros);
+
         return {
             success: true,
             message: "Lista de agendamentos retornada com sucesso",
@@ -76,93 +60,92 @@ async create(data, clienteId) {
                 page,
                 perPage,
                 total,
-
+                totalPages: Math.ceil(total / perPage)
             },
-            
             data: agendamentos,
-        };    
-        
+        };
     },
-// buscando agendamento por ID
+
     async findById(id, user) {
-        const agendamento = await prisma.agendamento.findUnique({
-            where: { id },
-            include: { servico: true, barbeiro: true, cliente: true},
+        const agendamento = await AgendamentoRepository.buscarPorId(id);
 
-        });
-
-        console.log("Usuário logado:", user);
-        console.log("Agendamento:", agendamento);
-
-        
-                
-//se não encontrar ou estiver deletado
-        if(!agendamento || agendamento.deletedAt) {
+        if (!agendamento || agendamento.deletedAt) {
             throw new Error("Agendamento não encontrado");
         }
 
-        //restrição de acesso: cliente ou barbeiro só vê seus próprios agendamentos
-        // Restrição de acesso 
-const tipo = user.tipo?.toUpperCase(); // garante que "barbeiro" ou "BARBEIRO" funcionem igual
-
-if (tipo === "CLIENTE" && agendamento.clienteId !== user.id) {
-    throw new Error("Acesso negado");
-}
-
-if (tipo === "BARBEIRO" && agendamento.barbeiroId !== user.id) {
-    throw new Error("Acesso negado");
-}
-
-return agendamento;
-
-},
-// atualizando agendamento
-    async update (id, data, user) {
-        const agendamento = await prisma.agendamento.findUnique({ where: { id } });
-
-       
-        if(!agendamento) throw new Error("Agendamento não encontrado");
-// verifica se o usuario é dono do agendamento
-
+        // Verificar permissão
         const tipo = user.tipo?.toUpperCase();
 
         if (tipo === "CLIENTE" && agendamento.clienteId !== user.id) {
             throw new Error("Acesso negado");
         }
-        if (tipo === "BARBEIRO" && agendamento.barbeiroId !== user.id) {
-    throw new Error("Acesso negado");
-  }
-  // atualizando os campos permitidos
-        return prisma.agendamento.update({
-            where: { id },
-            data: {
-                dataHora: data.dataHora ? new Date (data.dataHora) : agendamento.dataHora,
-                status: data.status || agendamento.status,
-                observacao: data.observacao ?? agendamento.observacao,
 
-            },
-        });
-            
-    },
-// deletando agendamento
-    async delete (id, user) {
-        const agendamento = await prisma.agendamento.findUnique({ where: { id } });
-        if (!agendamento) throw new Error ("Agendamento não encontrado");
-//verifica se o usuario é dono do agendamento
-
-        const tipo = user.tipo?.toUpperCase();
-        if (tipo === "CLIENTE" && agendamento.clienteId !==user.id){
-            throw new Error ("Acesso negado");
-        }   
         if (tipo === "BARBEIRO" && agendamento.barbeiroId !== user.id) {
             throw new Error("Acesso negado");
         }
 
-        //soft delete
-        return prisma.agendamento.update({
-            where: { id },
-            data: { deletedAt: new Date() }, 
+        return agendamento;
+    },
+
+    async update(id, data, user) {
+        const agendamento = await AgendamentoRepository.buscarPorId(id);
+
+        if (!agendamento) {
+            throw new Error("Agendamento não encontrado");
+        }
+
+        // Verificar permissão
+        const tipo = user.tipo?.toUpperCase();
+
+        if (tipo === "CLIENTE" && agendamento.clienteId !== user.id) {
+            throw new Error("Acesso negado");
+        }
+
+        if (tipo === "BARBEIRO" && agendamento.barbeiroId !== user.id) {
+            throw new Error("Acesso negado");
+        }
+
+        // Se mudou dataHora, verificar conflito
+        if (data.dataHora && data.dataHora !== agendamento.dataHora.toISOString()) {
+            const servico = await ServicoService.buscarPorId(agendamento.servicoId);
+            
+            const conflito = await AgendamentoRepository.verificarConflito(
+                agendamento.barbeiroId,
+                new Date(data.dataHora),
+                servico.duracao,
+                id // ignora o próprio agendamento
+            );
+
+            if (conflito) {
+                throw new Error('Já existe um agendamento para este barbeiro neste horário.');
+            }
+        }
+
+        return AgendamentoRepository.atualizar(id, {
+            dataHora: data.dataHora ? new Date(data.dataHora) : agendamento.dataHora,
+            status: data.status || agendamento.status,
+            observacao: data.observacao ?? agendamento.observacao,
         });
     },
 
+    async delete(id, user) {
+        const agendamento = await AgendamentoRepository.buscarPorId(id);
+
+        if (!agendamento) {
+            throw new Error("Agendamento não encontrado");
+        }
+
+        // Verificar permissão
+        const tipo = user.tipo?.toUpperCase();
+
+        if (tipo === "CLIENTE" && agendamento.clienteId !== user.id) {
+            throw new Error("Acesso negado");
+        }
+
+        if (tipo === "BARBEIRO" && agendamento.barbeiroId !== user.id) {
+            throw new Error("Acesso negado");
+        }
+
+        return AgendamentoRepository.deletar(id);
+    },
 };
