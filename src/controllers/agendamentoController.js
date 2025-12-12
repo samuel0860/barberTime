@@ -5,7 +5,7 @@ export const agendamentoController = {
     async create(req, res, next) {
         try {
             const data = agendamentoSchema.parse(req.body);
-            const clienteId = req.user.id;
+            const clienteId = req.usuario.id; 
 
             const novoAgendamento = await agendamentoService.create(data, clienteId);
             
@@ -21,7 +21,7 @@ export const agendamentoController = {
 
     async findAll(req, res, next) {
         try {
-            const user = req.user;
+            const user = req.usuario;
             const { page = 1, perPage = 10 } = req.query;
 
             const lista = await agendamentoService.findAll(
@@ -38,7 +38,7 @@ export const agendamentoController = {
 
     async findById(req, res, next) {
         try {
-            const user = req.user;
+            const user = req.usuario; 
             const agendamento = await agendamentoService.findById(req.params.id, user);
             
             res.status(200).json({
@@ -52,7 +52,7 @@ export const agendamentoController = {
 
     async update(req, res, next) {
         try {
-            const user = req.user;
+            const user = req.usuario;
             const atualizado = await agendamentoService.update(
                 req.params.id, 
                 req.body, 
@@ -71,7 +71,7 @@ export const agendamentoController = {
 
     async delete(req, res, next) {
         try {
-            const user = req.user;
+            const user = req.usuario; 
             await agendamentoService.delete(req.params.id, user);
             
             res.status(200).json({
