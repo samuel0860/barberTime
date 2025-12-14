@@ -3,19 +3,19 @@ import { ServicoService } from './servicoService.js';
 
 export const agendamentoService = {
     async create(data, clienteId) {
-        // 1. Buscar serviço
+        // buscar serviço
         const servico = await ServicoService.buscarPorId(data.servicoId);
         
         if (!servico || servico.deletedAt) {
             throw new Error('Serviço não encontrado ou indisponível.');
         }
 
-        // 2. Verificar se barbeiro oferece o serviço
+        // verificar se barbeiro oferece o serviço
         if (servico.barbeiroId !== data.barbeiroId) {
             throw new Error('O barbeiro informado não oferece esse serviço.');
         }
         
-        // 3. Verificar conflito de horário (AGORA CORRETO)
+        // verificar conflito de horário
         const conflito = await AgendamentoRepository.verificarConflito(
             data.barbeiroId,
             new Date(data.dataHora),
@@ -26,7 +26,7 @@ export const agendamentoService = {
             throw new Error('Já existe um agendamento para este barbeiro neste horário.');
         }
 
-        // 4. Criar agendamento
+        // criar agendamento
         return AgendamentoRepository.criar({
             dataHora: new Date(data.dataHora),
             observacao: data.observacao || null,
@@ -39,9 +39,19 @@ export const agendamentoService = {
     async findAll(user, page = 1, perPage = 10) {
         const tipo = user.tipo?.toUpperCase();
         
-        const filtros = tipo === "BARBEIRO"
-            ? { barbeiroId: user.id }
-            : { clienteId: user.id };
+        let filtros = {};
+        
+        // CLIENTE só vê os próprios
+        if (tipo === "CLIENTE") {
+            filtros.clienteId = user.id;
+        }
+        
+        // BARBEIRO vê os dele
+        if (tipo === "BARBEIRO") {
+            filtros.barbeiroId = user.id;
+        }
+        
+        // ADMIN vê todos (não adiciona filtro)
 
         const skip = (page - 1) * perPage;
 
@@ -73,13 +83,19 @@ export const agendamentoService = {
             throw new Error("Agendamento não encontrado");
         }
 
-        // Verificar permissão
         const tipo = user.tipo?.toUpperCase();
 
+        // ADMIN pode ver qualquer agendamento
+        if (tipo === "ADMIN") {
+            return agendamento;
+        }
+
+        // CLIENTE só vê os próprios
         if (tipo === "CLIENTE" && agendamento.clienteId !== user.id) {
             throw new Error("Acesso negado");
         }
 
+        // BARBEIRO só vê os dele
         if (tipo === "BARBEIRO" && agendamento.barbeiroId !== user.id) {
             throw new Error("Acesso negado");
         }
@@ -94,18 +110,22 @@ export const agendamentoService = {
             throw new Error("Agendamento não encontrado");
         }
 
-        // Verificar permissão
         const tipo = user.tipo?.toUpperCase();
 
-        if (tipo === "CLIENTE" && agendamento.clienteId !== user.id) {
-            throw new Error("Acesso negado");
+        // ADMIN pode atualizar qualquer agendamento
+        if (tipo !== "ADMIN") {
+            // CLIENTE só atualiza os próprios
+            if (tipo === "CLIENTE" && agendamento.clienteId !== user.id) {
+                throw new Error("Acesso negado");
+            }
+
+            // BARBEIRO só atualiza os dele
+            if (tipo === "BARBEIRO" && agendamento.barbeiroId !== user.id) {
+                throw new Error("Acesso negado");
+            }
         }
 
-        if (tipo === "BARBEIRO" && agendamento.barbeiroId !== user.id) {
-            throw new Error("Acesso negado");
-        }
-
-        // Se mudou dataHora, verificar conflito
+        // se mudou dataHora, verificar conflito
         if (data.dataHora && data.dataHora !== agendamento.dataHora.toISOString()) {
             const servico = await ServicoService.buscarPorId(agendamento.servicoId);
             
@@ -135,15 +155,19 @@ export const agendamentoService = {
             throw new Error("Agendamento não encontrado");
         }
 
-        // Verificar permissão
         const tipo = user.tipo?.toUpperCase();
 
-        if (tipo === "CLIENTE" && agendamento.clienteId !== user.id) {
-            throw new Error("Acesso negado");
-        }
+        // ADMIN pode deletar qualquer agendamento
+        if (tipo !== "ADMIN") {
+            // CLIENTE só deleta os próprios
+            if (tipo === "CLIENTE" && agendamento.clienteId !== user.id) {
+                throw new Error("Acesso negado");
+            }
 
-        if (tipo === "BARBEIRO" && agendamento.barbeiroId !== user.id) {
-            throw new Error("Acesso negado");
+            // BARBEIRO só deleta os dele
+            if (tipo === "BARBEIRO" && agendamento.barbeiroId !== user.id) {
+                throw new Error("Acesso negado");
+            }
         }
 
         return AgendamentoRepository.deletar(id);
