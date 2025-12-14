@@ -3,95 +3,94 @@
 const API_URL = 'http://localhost:3000';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const loginBtn = document.getElementById('login-btn');
+  console.log('DOM carregado!');
+  
   const emailInput = document.getElementById('email');
-  const passwordInput = document.getElementById('password');
-  const errorMsg = document.getElementById('error-msg');
-
-  // Login ao pressionar Enter
-  emailInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleLogin();
-  });
-
-  passwordInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleLogin();
-  });
-
-  loginBtn.addEventListener('click', handleLogin);
-
-  async function handleLogin() {
+  const senhaInput = document.getElementById('password');
+  const loginBtn = document.getElementById('login-btn');
+  const errorDiv = document.getElementById('error-msg');
+  
+  if (!emailInput || !senhaInput || !loginBtn) {
+    console.error('Elementos não encontrados!');
+    return;
+  }
+  
+  console.log('Elementos encontrados com sucesso!');
+  
+  // Função de login
+  async function realizarLogin() {
     const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
-
-    // Limpar mensagem de erro
-    errorMsg.textContent = '';
-    errorMsg.style.display = 'none';
-
-    // Validar campos
-    if (!email || !password) {
-      showError('Preencha todos os campos!');
+    const senha = senhaInput.value;
+    
+    if (!email || !senha) {
+      if (errorDiv) {
+        errorDiv.textContent = 'Preencha email e senha!';
+        errorDiv.style.display = 'block';
+      }
       return;
     }
-
-    // Validar formato de email
-    if (!isValidEmail(email)) {
-      showError('Email inválido!');
-      return;
+    
+    if (errorDiv) {
+      errorDiv.style.display = 'none';
     }
-
-    // Loading state
+    
     loginBtn.disabled = true;
-    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> AGUARDE...';
-
+    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENTRANDO...';
+    
     try {
-      const response = await fetch(`${API_URL}/login`, {
+      console.log('Tentando login com:', email);
+      
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ email, senha })
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Email ou senha incorretos!');
-      }
-
-      // Salvar token
-      localStorage.setItem('token', data.token);
       
-      // Sucesso visual
-      loginBtn.innerHTML = '<i class="fas fa-check-circle"></i> SUCESSO!';
-      loginBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
-
-      // Redirecionar
-      setTimeout(() => {
-        window.location.href = 'dashboard.html';
-      }, 500);
-
+      const data = await response.json();
+      console.log('Resposta do servidor:', data);
+      
+      if (!response.ok) {
+        throw new Error(data.error || data.message || 'Erro ao fazer login');
+      }
+      
+      // Salvar token e dados do usuário
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('userId', data.usuario.id);
+      localStorage.setItem('userName', data.usuario.nome);
+      localStorage.setItem('userEmail', data.usuario.email);
+      localStorage.setItem('userType', data.usuario.tipo);
+      
+      console.log('Login realizado com sucesso!');
+      
+      // Redirecionar para dashboard
+      window.location.href = 'dashboard.html';
+      
     } catch (error) {
       console.error('Erro no login:', error);
-      showError(error.message || 'Erro ao conectar ao servidor.');
       
-      // Resetar botão
+      if (errorDiv) {
+        errorDiv.textContent = error.message;
+        errorDiv.style.display = 'block';
+      } else {
+        alert('Erro: ' + error.message);
+      }
+      
       loginBtn.disabled = false;
-      loginBtn.innerHTML = 'ENTRAR';
-
-      // Shake na tela
-      document.querySelector('.auth-container').style.animation = 'shake 0.4s';
-      setTimeout(() => {
-        document.querySelector('.auth-container').style.animation = '';
-      }, 400);
+      loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> ENTRAR';
     }
   }
-
-  function showError(message) {
-    errorMsg.textContent = message;
-    errorMsg.style.display = 'block';
-  }
-
-  function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  }
+  
+  // Click no botão
+  loginBtn.addEventListener('click', realizarLogin);
+  
+  // Enter nos campos
+  emailInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') realizarLogin();
+  });
+  
+  senhaInput.addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') realizarLogin();
+  });
 });
