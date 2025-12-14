@@ -110,16 +110,11 @@
           <label><i class="fas fa-cut"></i> Serviço</label>
           <select id="service" required>
             <option value="">Escolha o serviço</option>
-            <option value="Corte Tradicional">Corte Tradicional - R$ 35</option>
-            <option value="Corte Degradê">Corte Degradê - R$ 40</option>
-            <option value="Barba">Barba - R$ 25</option>
-            <option value="Corte + Barba">Corte + Barba - R$ 50</option>
-            <option value="Design Capilar">Design Capilar - R$ 60</option>
           </select>
 
-          <label><i class="fas fa-user-tie"></i> Barbeiro (Opcional)</label>
-          <select id="barber">
-            <option value="">Sem preferência</option>
+          <label><i class="fas fa-user-tie"></i> Barbeiro</label>
+          <select id="barber" required>
+            <option value="">Selecione o barbeiro</option>
           </select>
 
           <button class="btn-submit" onclick="createAppointment()">
@@ -135,8 +130,8 @@
     <!-- SEÇÃO: BARBEIROS -->
     <section id="barbers-section" class="content-section">
       <div class="section-header">
-        <h1><i class="fas fa-users"></i> Nossos Barbeiros</h1>
-        <p>Conheça nossa equipe de profissionais</p>
+        <h1><i class="fas fa-users"></i> Nossa Equipe</h1>
+        <p>Conheça os profissionais do squad</p>
       </div>
       <div id="barbers-grid" class="barbers-grid"></div>
     </section>
@@ -144,29 +139,53 @@
     <!-- SEÇÃO: SOBRE NÓS -->
     <section id="about-section" class="content-section">
       <div class="section-header">
-        <h1><i class="fas fa-info-circle"></i> Sobre a BarberTime</h1>
-        <p>Conheça nossa história</p>
+        <h1><i class="fas fa-info-circle"></i> Sobre o BarberTime</h1>
+        <p>Sistema completo de agendamento para barbearias</p>
       </div>
 
       <div class="about-content">
         <div class="about-card">
-          <h3><i class="fas fa-star"></i> Nossa Missão</h3>
-          <p>Proporcionar uma experiência única de cuidado pessoal, unindo técnica clássica com estilo moderno.</p>
+          <h3><i class="fas fa-rocket"></i> Nossa Missão</h3>
+          <p>Facilitar a gestão de barbearias através de tecnologia moderna e intuitiva, conectando profissionais e clientes de forma eficiente.</p>
         </div>
 
         <div class="about-card">
           <h3><i class="fas fa-trophy"></i> Nossos Valores</h3>
           <ul>
-            <li><i class="fas fa-check"></i> Excelência em atendimento</li>
-            <li><i class="fas fa-check"></i> Profissionalismo</li>
-            <li><i class="fas fa-check"></i> Respeito ao cliente</li>
-            <li><i class="fas fa-check"></i> Inovação constante</li>
+            <li><i class="fas fa-check"></i> Inovação tecnológica</li>
+            <li><i class="fas fa-check"></i> Simplicidade e praticidade</li>
+            <li><i class="fas fa-check"></i> Suporte ao cliente</li>
+            <li><i class="fas fa-check"></i> Crescimento contínuo</li>
           </ul>
         </div>
 
         <div class="about-card">
           <h3><i class="fas fa-history"></i> Nossa História</h3>
-          <p>Fundada em 2020, a BarberTime rapidamente se tornou referência em cortes masculinos premium. Com uma equipe altamente qualificada e um ambiente acolhedor, conquistamos a confiança de centenas de clientes.</p>
+          <p>Fundado em 2025, o BarberTime nasceu da necessidade de modernizar a gestão de barbearias. Com uma plataforma completa de agendamentos online, conquistamos a confiança de estabelecimentos e profissionais.</p>
+        </div>
+
+        <div class="about-card">
+          <h3><i class="fas fa-cogs"></i> Tecnologia</h3>
+          <p>Desenvolvido com Node.js, Express, PostgreSQL e Prisma ORM. Interface responsiva e intuitiva para melhor experiência do usuário.</p>
+        </div>
+
+        <div class="about-card">
+          <h3><i class="fas fa-star"></i> Funcionalidades</h3>
+          <ul>
+            <li><i class="fas fa-check"></i> Agendamento online 24/7</li>
+            <li><i class="fas fa-check"></i> Gestão de serviços e preços</li>
+            <li><i class="fas fa-check"></i> Controle de horários</li>
+            <li><i class="fas fa-check"></i> Painel administrativo completo</li>
+          </ul>
+        </div>
+
+        <div class="about-card">
+          <h3><i class="fas fa-users"></i> Para Quem</h3>
+          <ul>
+            <li><i class="fas fa-check"></i> Barbearias modernas</li>
+            <li><i class="fas fa-check"></i> Barbeiros independentes</li>
+            <li><i class="fas fa-check"></i> Clientes que valorizam praticidade</li>
+          </ul>
         </div>
       </div>
     </section>
@@ -175,20 +194,14 @@
     <section id="contact-section" class="content-section">
       <div class="section-header">
         <h1><i class="fas fa-phone"></i> Entre em Contato</h1>
-        <p>Estamos sempre à disposição</p>
+        <p>Fale com a equipe BarberTime</p>
       </div>
 
       <div class="contact-content">
         <div class="contact-card">
-          <i class="fas fa-map-marker-alt"></i>
-          <h3>Endereço</h3>
-          <p>Rua das Barbearias, 123<br>Centro - São Paulo/SP</p>
-        </div>
-
-        <div class="contact-card">
           <i class="fas fa-phone"></i>
           <h3>Telefone</h3>
-          <p>(11) 99999-9999</p>
+          <p>+55 31 7184-0575</p>
         </div>
 
         <div class="contact-card">
@@ -200,7 +213,7 @@
         <div class="contact-card">
           <i class="fab fa-whatsapp"></i>
           <h3>WhatsApp</h3>
-          <a href="https://wa.me/5511999999999" target="_blank" class="whatsapp-link">
+          <a href="https://wa.me/5521993570463" target="_blank" class="whatsapp-link">
             Falar no WhatsApp
           </a>
         </div>
@@ -208,15 +221,25 @@
         <div class="contact-card">
           <i class="fab fa-instagram"></i>
           <h3>Instagram</h3>
-          <p>@barbertime</p>
+          <p>@barber.time</p>
+          <a href="https://www.instagram.com/barbertime.2025/" target="_blank" class="whatsapp-link" style="margin-top: 10px;">
+            Seguir no Instagram
+          </a>
         </div>
 
         <div class="contact-card">
-          <i class="fas fa-clock"></i>
-          <h3>Horário de Funcionamento</h3>
-          <p><strong>Segunda a Sexta:</strong> 09:00 - 20:00</p>
-          <p><strong>Sábado:</strong> 09:00 - 18:00</p>
-          <p><strong>Domingo:</strong> Fechado</p>
+          <i class="fas fa-info-circle"></i>
+          <h3>Sobre o Sistema</h3>
+          <p>BarberTime é uma plataforma completa de agendamento online para barbearias modernas e profissionais independentes.</p>
+        </div>
+
+        <div class="contact-card">
+          <i class="fas fa-code"></i>
+          <h3>Desenvolvido por</h3>
+          <p><strong>Squad one</strong></p>
+          <p style="font-size: 14px; margin-top: 8px;">
+            Lucas, Evely, Guilhermy, Samuel, Ingrid e Lettícia
+          </p>
         </div>
       </div>
     </section>
