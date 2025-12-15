@@ -1,49 +1,13 @@
-// frontend/js/login.js - VERSÃO CORRIGIDA
+// frontend/js/login.js - VERSÃO FINAL CORRIGIDA
 
 const API_URL = 'http://localhost:3000';
 
 document.addEventListener('DOMContentLoaded', () => {
-  console.log('DOM carregado!');
+  console.log('✅ DOM carregado!');
   
   const emailInput = document.getElementById('email');
-<<<<<<< HEAD
-  const senhaInput = document.getElementById('password');
-  const loginBtn = document.getElementById('login-btn');
-  const errorDiv = document.getElementById('error-msg');
-  
-  if (!emailInput || !senhaInput || !loginBtn) {
-    console.error('Elementos não encontrados!');
-    return;
-  }
-  
-  console.log('Elementos encontrados com sucesso!');
-  
-  // Função de login
-  async function realizarLogin() {
-    const email = emailInput.value.trim();
-    const senha = senhaInput.value;
-    
-    if (!email || !senha) {
-      if (errorDiv) {
-        errorDiv.textContent = 'Preencha email e senha!';
-        errorDiv.style.display = 'block';
-      }
-      return;
-    }
-    
-    if (errorDiv) {
-      errorDiv.style.display = 'none';
-    }
-    
-    loginBtn.disabled = true;
-    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENTRANDO...';
-    
-    try {
-      console.log('Tentando login com:', email);
-      
-      const response = await fetch(`${API_URL}/api/auth/login`, {
-=======
   const passwordInput = document.getElementById('password');
+  const loginBtn = document.getElementById('login-btn');
   const errorMsg = document.getElementById('error-msg');
 
   // Se já está logado, redirecionar
@@ -51,6 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
     window.location.href = 'dashboard.html';
     return;
   }
+
+  if (!emailInput || !passwordInput || !loginBtn) {
+    console.error('❌ Elementos do formulário não encontrados!');
+    return;
+  }
+
+  console.log('✅ Elementos encontrados com sucesso!');
 
   // Login ao pressionar Enter
   emailInput.addEventListener('keypress', (e) => {
@@ -65,12 +36,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function handleLogin() {
     const email = emailInput.value.trim();
-    const password = passwordInput.value.trim();
+    const senha = passwordInput.value.trim();
 
+    // Limpar mensagens anteriores
     errorMsg.textContent = '';
     errorMsg.style.display = 'none';
 
-    if (!email || !password) {
+    // Validações básicas
+    if (!email || !senha) {
       showError('Preencha todos os campos!');
       return;
     }
@@ -80,69 +53,20 @@ document.addEventListener('DOMContentLoaded', () => {
       return;
     }
 
+    // Desabilitar botão durante requisição
     loginBtn.disabled = true;
     loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ENTRANDO...';
 
     try {
       console.log('🔄 Tentando login...', { email });
 
-      const response = await fetch(`${API_URL}/login`, {
->>>>>>> 361e8daa50c65efae7838f4726476b34156605f5
+      const response = await fetch(`${API_URL}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({ email, senha })
       });
-<<<<<<< HEAD
-      
-      const data = await response.json();
-      console.log('Resposta do servidor:', data);
-      
-      if (!response.ok) {
-        throw new Error(data.error || data.message || 'Erro ao fazer login');
-      }
-      
-      // Salvar token e dados do usuário
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('userId', data.usuario.id);
-      localStorage.setItem('userName', data.usuario.nome);
-      localStorage.setItem('userEmail', data.usuario.email);
-      localStorage.setItem('userType', data.usuario.tipo);
-      
-      console.log('Login realizado com sucesso!');
-      
-      // Redirecionar para dashboard
-      window.location.href = 'dashboard.html';
-      
-    } catch (error) {
-      console.error('Erro no login:', error);
-      
-      if (errorDiv) {
-        errorDiv.textContent = error.message;
-        errorDiv.style.display = 'block';
-      } else {
-        alert('Erro: ' + error.message);
-      }
-      
-      loginBtn.disabled = false;
-      loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> ENTRAR';
-    }
-  }
-  
-  // Click no botão
-  loginBtn.addEventListener('click', realizarLogin);
-  
-  // Enter nos campos
-  emailInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') realizarLogin();
-  });
-  
-  senhaInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') realizarLogin();
-  });
-});
-=======
 
       console.log('📡 Status da resposta:', response.status);
 
@@ -153,29 +77,32 @@ document.addEventListener('DOMContentLoaded', () => {
         throw new Error(data.error || data.message || 'Email ou senha incorretos!');
       }
 
-      // Salvar dados do usuário
+      // Salvar dados do usuário no localStorage
       localStorage.setItem('token', data.token);
-      localStorage.setItem('userName', data.user?.name || data.name || 'Usuário');
-      localStorage.setItem('userEmail', data.user?.email || email);
-      localStorage.setItem('userId', data.user?.id || data.id || '1');
+      localStorage.setItem('userName', data.usuario?.nome || 'Usuário');
+      localStorage.setItem('userEmail', data.usuario?.email || email);
+      localStorage.setItem('userId', data.usuario?.id || '');
+      localStorage.setItem('userType', data.usuario?.tipo || 'CLIENTE');
 
       console.log('✅ Login realizado com sucesso!');
 
+      // Feedback visual de sucesso
       loginBtn.innerHTML = '<i class="fas fa-check-circle"></i> SUCESSO!';
       loginBtn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
 
+      // Redirecionar após breve delay
       setTimeout(() => {
         window.location.href = 'dashboard.html';
       }, 500);
 
     } catch (error) {
       console.error('❌ Erro no login:', error);
-      showError(error.message || 'Erro ao conectar ao servidor. Verifique se o backend está rodando.');
+      showError(error.message || 'Erro ao conectar ao servidor. Verifique se o backend está rodando na porta 3000.');
       
       loginBtn.disabled = false;
       loginBtn.innerHTML = 'ENTRAR';
 
-      // Shake animation
+      // Animação de shake no erro
       document.querySelector('.auth-container').style.animation = 'shake 0.4s';
       setTimeout(() => {
         document.querySelector('.auth-container').style.animation = '';
@@ -193,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// CSS para shake (adicionar se não tiver)
+// CSS para animação de shake (se não existir)
 const style = document.createElement('style');
 style.textContent = `
   @keyframes shake {
@@ -203,4 +130,3 @@ style.textContent = `
   }
 `;
 document.head.appendChild(style);
->>>>>>> 361e8daa50c65efae7838f4726476b34156605f5
