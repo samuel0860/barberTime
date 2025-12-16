@@ -9,7 +9,7 @@ registerBtn.addEventListener("click", async (e) => {
   // Inputs
   const nome = document.getElementById("name").value.trim();
   const email = document.getElementById("email").value.trim();
-  const telefone = document.getElementById("phone")?.value.trim() || ""; // Se tiver campo telefone
+  const telefone = document.getElementById("phone")?.value.trim() || "";
   const senha = document.getElementById("password").value;
   const confirmPassword = document.getElementById("confirmPassword").value;
 
@@ -33,7 +33,7 @@ registerBtn.addEventListener("click", async (e) => {
     return;
   }
 
-  // Dados para API (com os nomes corretos que o backend espera)
+  // Dados para API
   const payload = {
     nome,
     email,
@@ -45,7 +45,7 @@ registerBtn.addEventListener("click", async (e) => {
     registerBtn.disabled = true;
     registerBtn.textContent = "CRIANDO CONTA...";
 
-    const response = await fetch(`${API_URL}/api/auth/register`, {
+    const response = await fetch(`${API_URL}/auth/register`, { // 👈 REMOVIDO /api
       method: "POST",
       headers: {
         "Content-Type": "application/json"
