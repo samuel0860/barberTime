@@ -27,8 +27,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   async function login() {
-    alert('Função login foi chamada!');
-    
     const email = emailInput.value.trim();
     const senha = passwordInput.value.trim();
 
