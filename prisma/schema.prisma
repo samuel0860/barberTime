@@ -35,6 +35,10 @@ model Usuario {
   updatedAt DateTime      @updatedAt
   deletedAt DateTime?
   
+  // NOVOS CAMPOS para recuperação de senha
+  resetToken       String?
+  resetTokenExpiry DateTime?
+  
   // Relacionamentos
   agendamentosComoCliente  Agendamento[] @relation("ClienteAgendamentos")
   agendamentosComoBarbeiro Agendamento[] @relation("BarbeiroAgendamentos")
@@ -44,6 +48,7 @@ model Usuario {
   @@index([email])
   @@index([tipo])
   @@index([deletedAt]) // importante para queries com soft delete
+  @@index([resetToken]) // índice para busca rápida do token
 }
 
 // Serviços oferecidos
