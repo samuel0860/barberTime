@@ -17,9 +17,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loginBtn.addEventListener('click', login);
+
   emailInput.addEventListener('keypress', e => {
     if (e.key === 'Enter') login();
   });
+
   passwordInput.addEventListener('keypress', e => {
     if (e.key === 'Enter') login();
   });
@@ -63,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('userType', data.usuario.tipo);
 
       window.location.href = 'dashboard.html';
-
     } catch (err) {
       showError(err.message || 'Erro ao tentar login');
       loginBtn.disabled = false;
