@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:3000';
+const API_URL = 'https://barbertime-api.onrender.com/';
 
 document.addEventListener('DOMContentLoaded', () => {
   const emailInput = document.getElementById('email');
