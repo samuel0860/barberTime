@@ -1,18 +1,24 @@
 const API_URL = 'https://barbertime-api.onrender.com';
 
 document.addEventListener('DOMContentLoaded', () => {
+  const forgotForm = document.getElementById('forgot-form');
   const resetBtn = document.getElementById('reset-btn');
   const emailInput = document.getElementById('email');
   const errorMsg = document.getElementById('error-msg');
   const successMsg = document.getElementById('success-msg');
 
+  forgotForm.addEventListener('submit', handleResetPassword);
+
   emailInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') handleResetPassword();
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleResetPassword(e);
+    }
   });
 
-  resetBtn.addEventListener('click', handleResetPassword);
-
-  async function handleResetPassword() {
+  async function handleResetPassword(e) {
+    e.preventDefault();
+    
     const email = emailInput.value.trim();
 
     errorMsg.textContent = '';
@@ -36,7 +42,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       console.log('📧 Enviando email de recuperação...', { email });
 
-      const response = await fetch(`${API_URL}/forgot-password`, {
+      const response = await fetch(`${API_URL}/api/auth/forgot-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -69,12 +75,15 @@ document.addEventListener('DOMContentLoaded', () => {
       showError(error.message || 'Erro ao enviar email. Verifique se o email está cadastrado.');
       
       resetBtn.disabled = false;
-      resetBtn.innerHTML = '<i class="fas fa-paper-plane"></i> ENVIAR EMAIL';
+      resetBtn.innerHTML = '<i class="fas fa-paper-plane"></i> ENVIAR LINK DE RECUPERAÇÃO';
 
-      document.querySelector('.auth-container').style.animation = 'shake 0.4s';
-      setTimeout(() => {
-        document.querySelector('.auth-container').style.animation = '';
-      }, 400);
+      const container = document.querySelector('.auth-container');
+      if (container) {
+        container.style.animation = 'shake 0.4s';
+        setTimeout(() => {
+          container.style.animation = '';
+        }, 400);
+      }
     }
   }
 
